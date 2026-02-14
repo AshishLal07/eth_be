@@ -1,8 +1,9 @@
 """Application configuration settings using Pydantic Settings."""
-from typing import List, Optional
+from typing import List, Optional, Union
 from pydantic_settings import BaseSettings
 from pydantic import Field, field_validator, computed_field
 import warnings
+import json
 
 
 class Settings(BaseSettings):
@@ -98,6 +99,22 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = False
+        
+        @classmethod
+        def parse_env_var(cls, field_name: str, raw_val: str):
+            """Custom parser for environment variables.
+            
+            Handles JSON strings for list fields (CORS_ORIGINS, etc.)
+            """
+            if field_name in ['CORS_ORIGINS', 'CORS_METHODS', 'CORS_HEADERS']:
+                # Try to parse as JSON first
+                try:
+                    return json.loads(raw_val)
+                except (json.JSONDecodeError, TypeError):
+                    # If not JSON, treat as comma-separated
+                    if isinstance(raw_val, str):
+                        return [item.strip() for item in raw_val.split(",") if item.strip()]
+            return raw_val
 
 
 # Global settings instance
