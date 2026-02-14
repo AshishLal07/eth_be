@@ -1,0 +1,46 @@
+# Render Blueprint for one-click deployment
+# Documentation: https://render.com/docs/blueprint-spec
+
+services:
+  # FastAPI Backend
+  - type: web
+    name: ethara-api
+    runtime: python
+    plan: free # Free tier
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: APP_NAME
+        value: Ethara API
+      - key: APP_VERSION
+        value: 1.0.0
+      - key: DEBUG
+        value: false
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: JWT_ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 30
+      - key: JWT_REFRESH_TOKEN_EXPIRE_DAYS
+        value: 7
+      - key: COOKIE_HTTPONLY
+        value: true
+      - key: COOKIE_SAMESITE
+        value: none
+      - key: CORS_CREDENTIALS
+        value: true
+      - key: CORS_METHODS
+        value: '["*"]'
+      - key: CORS_HEADERS
+        value: '["*"]'
+      # Sensitive values - Set these in Render dashboard
+      - key: MONGODB_URL
+        sync: false # User must set this manually
+      - key: DATABASE_NAME
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false # Set to your GitHub Pages URL
